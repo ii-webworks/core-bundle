@@ -1,5 +1,5 @@
 {
-    "name": "webworks-nuernberg/core-bundle",
+    "name": "webworksnbg/core-bundle",
     "description": "webworks Core Bundle",
     "keywords": ["core"],
     "type": "symfony-bundle",
