@@ -52,6 +52,8 @@ abstract class BaseService
         return $this->getContainer()->get('security.token_storage')->getToken()->getUser();
     }
 
+    public abstract function getClassName();
+
     /**
      * @return Query
      */

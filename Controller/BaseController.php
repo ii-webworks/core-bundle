@@ -53,7 +53,9 @@ abstract class BaseController extends Controller
     /**
      * @return string
      */
-    protected abstract function getMainClassName();
+    private function getMainClassName() {
+        return $this->getService()->getClassName();
+    }
 
     /**
      * @param Request $request
