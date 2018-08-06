@@ -3,7 +3,8 @@
     "description": "webworks Core Bundle",
     "keywords": ["core"],
     "type": "symfony-bundle",
-    "license": "Apache-2.0",
+    "license": "MIT",
+    "version": "1.0",
     "authors": [
         {
             "name": "Anton Dachauer",
