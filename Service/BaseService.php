@@ -12,6 +12,8 @@ use Doctrine\ORM\Query;
 use FOS\UserBundle\Model\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\Form;
+use webworks\CoreBundle\Model\RoutesInterface;
+use webworks\CoreBundle\Model\TemplatesInterface;
 
 /**
  * Class BaseService
@@ -19,8 +21,13 @@ use Symfony\Component\Form\Form;
  */
 abstract class BaseService
 {
+    const TABLE_ALIAS = 'a';
 
     private $container;
+    /** @var RoutesInterface $routes */
+    private $routes;
+    /** @var TemplatesInterface $templates */
+    private $templates;
 
     /**
      * BaseService constructor.
@@ -30,6 +37,16 @@ abstract class BaseService
     {
         $this->container = $container;
     }
+
+    /**
+     * @return string
+     */
+    abstract public function getFormClassName();
+
+    /**
+     * @return string
+     */
+    public abstract function getEntityClassName();
 
     /**
      * @return ContainerInterface
@@ -52,61 +69,148 @@ abstract class BaseService
         return $this->getContainer()->get('security.token_storage')->getToken()->getUser();
     }
 
-    public abstract function getClassName();
+    /**
+     * @return RoutesInterface
+     */
+    abstract public function getRoutesConfig();
+
+    /**
+     * @return RoutesInterface
+     * @throws \Exception
+     */
+    public function getRoutes()
+    {
+        if (!$this->routes instanceof RoutesInterface) {
+            $routes = $this->getRoutesConfig();
+            if (!$routes instanceof RoutesInterface) {
+                throw new \Exception('The method getRoutesConfig() has to return a RoutesInterface Object');
+            }
+            $this->setRoutes($routes);
+        }
+        return $this->routes;
+    }
+
+    /**
+     * @param RoutesInterface $routes
+     * @return $this
+     * @throws \Exception
+     */
+    public function setRoutes(RoutesInterface $routes)
+    {
+        $this->validateRoutes($routes);
+        $this->routes = $routes;
+
+        return $this;
+    }
+
+    /**
+     * @param RoutesInterface $routes
+     * @return bool
+     * @throws \Exception
+     */
+    public function validateRoutes(RoutesInterface $routes)
+    {
+        $router = $this->getContainer()->get('router');
+        foreach ($routes->getRouteKeys() as $keyname) {
+            $getter = 'get' . $keyname;
+            if (!method_exists($routes, $getter)) {
+                throw new \Exception('Method "' . $getter . '" for property "' . $keyname . '" in class "' . get_class($routes) . '" not found. Please define a getter and setter for your properties.');
+            }
+            if (is_null($router->getRouteCollection()->get($routes->$getter()))) {
+                throw new \Exception('Unknown route "' . $routes->$getter() . '".');
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @return TemplatesInterface
+     */
+    abstract public function getTemplatesConfig();
+
+    /**
+     * @return TemplatesInterface
+     * @throws \Exception
+     */
+    public function getTemplates()
+    {
+        if (!$this->templates instanceof TemplatesInterface) {
+            $templates = $this->getTemplatesConfig();
+            if (!$templates instanceof TemplatesInterface) {
+                throw new \Exception('The method getTemplatesConfig() has to return a TemplatesInterface Object');
+            }
+            $this->setTemplates($templates);
+        }
+        return $this->templates;
+    }
+
+    /**
+     * @param TemplatesInterface $templates
+     * @return $this
+     * @throws \Exception
+     */
+    public function setTemplates(TemplatesInterface $templates)
+    {
+        $this->validateTemplates( $templates );
+        $this->templates = $templates;
+
+        return $this;
+    }
+
+    /**
+     * @param TemplatesInterface $templates
+     * @return bool
+     * @throws \Exception
+     */
+    public function validateTemplates(TemplatesInterface $templates)
+    {
+        $templateEngine = $this->getContainer()->get('templating');
+        foreach ($templates->getRouteKeys() as $keyname) {
+            $getter = 'get' . $keyname;
+            if (!method_exists($templates, $getter)) {
+                throw new \Exception('Method "' . $getter . '" for property "' . $keyname . '" in class "' . get_class($templates) . '" not found. Please define a getter and setter for your properties.');
+            }
+            if (!$templateEngine->exists($templates->$getter())) {
+                throw new \Exception('Unknown template "' . $templates->$getter() . '".');
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param $obj
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    public function getForm($obj)
+    {
+        return $this
+            ->getContainer()
+            ->get('form.factory')
+            ->create($this->getFormClassName(), $obj);
+    }
+
+    /**
+     * @param $id
+     * @return null|object
+     */
+    public function getOneById($id)
+    {
+        return $this->getEM()->getRepository($this->getEntityClassName())
+            ->find($id);
+    }
 
     /**
      * @return Query
      */
-    abstract public function getAll();
-
-    /**
-     * @return array
-     */
-    abstract public function getTemplates();
-
-    /**
-     * @param $key
-     * @return string
-     * @throws \Exception
-     */
-    public function getTemplate($key)
+    public function getAll()
     {
-        $templates = $this->getTemplates();
-        if (isset($templates[$key])) {
-            return $templates[$key];
-        }
-
-        throw new \Exception('Template for key "' . $key . '" not found.');
+        return $this->getEM()->getRepository($this->getEntityClassName())
+            ->createQueryBuilder($this->getTableAlias())
+            ->getQuery();
     }
 
-    /**
-     * @return Form
-     */
-    abstract public function getForm($obj);
-
-    /**
-     * @param $id
-     * @return object
-     */
-    abstract public function getOneById($id);
-
-    /**
-     * @return array
-     */
-    abstract public function getRoutes();
-
-    /**
-     * @param $key
-     * @return string
-     * @throws \Exception
-     */
-    public function getRoute($key)
+    public function getTableAlias()
     {
-        $routes = $this->getRoutes();
-        if (isset($routes[$key])) {
-            return $routes[$key];
-        }
-
-        throw new \Exception('Route for key "' . $key . '" not found.');
+        return self::TABLE_ALIAS;
     }
 }

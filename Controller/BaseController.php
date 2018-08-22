@@ -52,9 +52,11 @@ abstract class BaseController extends Controller
 
     /**
      * @return string
+     *
+     * @todo: why does this method exist? it is only used once and the name of the method is ambiguous
      */
     private function getMainClassName() {
-        return $this->getService()->getClassName();
+        return $this->getService()->getEntityClassName();
     }
 
     /**
@@ -73,10 +75,11 @@ abstract class BaseController extends Controller
         );
 
         $params = [
+            'table_alias' => $this->getService()->getTableAlias(),
             'items' => $pagination,
             'routes' => $this->getService()->getRoutes(),
         ];
-        return $this->render($this->getService()->getTemplate('index'), $params);
+        return $this->render($this->getService()->getTemplates()->getIndex(), $params);
     }
 
     /**
@@ -85,6 +88,7 @@ abstract class BaseController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     protected function processForm(Request $request, $id = null)
     {
@@ -127,7 +131,7 @@ abstract class BaseController extends Controller
             $this->getService()->getEM()->flush();
 
             $this->addFlash('success', 'Der Datensatz wurde erfolgreich gespeichert.');
-            return $this->redirectToRoute($this->getService()->getRoute('index'));
+            return $this->redirectToRoute($this->getService()->getRoutes()->getIndex());
         }
 
         $params = [
@@ -136,9 +140,9 @@ abstract class BaseController extends Controller
             'routes' => $this->getService()->getRoutes(),
         ];
         if (!is_null($id) && $id > 0) {
-            return $this->render($this->getService()->getTemplate('edit'), $params);
+            return $this->render($this->getService()->getTemplates()->getEdit(), $params);
         } else {
-            return $this->render($this->getService()->getTemplate('create'), $params);
+            return $this->render($this->getService()->getTemplates()->getCreate(), $params);
         }
     }
 
@@ -202,6 +206,7 @@ abstract class BaseController extends Controller
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function deleteAction(Request $request, $id)
     {
@@ -219,7 +224,7 @@ abstract class BaseController extends Controller
             $this->getService()->getEM()->remove($obj);
             $this->getService()->getEM()->flush();
 
-            return $this->redirectToRoute($this->getService()->getRoute('index'));
+            return $this->redirectToRoute($this->getService()->getRoutes()->getIndex());
         }
 
         $params = [
@@ -227,7 +232,7 @@ abstract class BaseController extends Controller
             'obj' => $obj,
             'form' => $form->createView(),
         ];
-        return $this->render($this->getService()->getTemplate('delete'), $params);
+        return $this->render($this->getService()->getTemplates()->getDelete(), $params);
     }
 
     /**
