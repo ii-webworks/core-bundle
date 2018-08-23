@@ -11,8 +11,9 @@ namespace webworks\CoreBundle\Service;
 use Doctrine\ORM\Query;
 use FOS\UserBundle\Model\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Form\Form;
+use webworks\CoreBundle\Model\Routes;
 use webworks\CoreBundle\Model\RoutesInterface;
+use webworks\CoreBundle\Model\Templates;
 use webworks\CoreBundle\Model\TemplatesInterface;
 
 /**
@@ -56,6 +57,9 @@ abstract class BaseService
         return $this->container;
     }
 
+    /**
+     * @return \Doctrine\ORM\EntityManager|object
+     */
     public function getEM()
     {
         return $this->getContainer()->get('doctrine.orm.default_entity_manager');
@@ -70,23 +74,20 @@ abstract class BaseService
     }
 
     /**
-     * @return RoutesInterface
-     */
-    abstract public function getRoutesConfig();
-
-    /**
+     * @param string $prefix
      * @return RoutesInterface
      * @throws \Exception
      */
-    public function getRoutes()
+    public function getRoutes($prefix = '')
     {
         if (!$this->routes instanceof RoutesInterface) {
-            $routes = $this->getRoutesConfig();
+            $routes = $this->configureRoutes($prefix);
             if (!$routes instanceof RoutesInterface) {
-                throw new \Exception('The method getRoutesConfig() has to return a RoutesInterface Object');
+                throw new \Exception('The method getRoutesConfig() must return a RoutesInterface Object');
             }
             $this->setRoutes($routes);
         }
+
         return $this->routes;
     }
 
@@ -124,18 +125,14 @@ abstract class BaseService
     }
 
     /**
-     * @return TemplatesInterface
-     */
-    abstract public function getTemplatesConfig();
-
-    /**
+     * @param string $prefix
      * @return TemplatesInterface
      * @throws \Exception
      */
-    public function getTemplates()
+    public function getTemplates($prefix = '')
     {
         if (!$this->templates instanceof TemplatesInterface) {
-            $templates = $this->getTemplatesConfig();
+            $templates = $this->configureTemplates($prefix);
             if (!$templates instanceof TemplatesInterface) {
                 throw new \Exception('The method getTemplatesConfig() has to return a TemplatesInterface Object');
             }
@@ -151,7 +148,7 @@ abstract class BaseService
      */
     public function setTemplates(TemplatesInterface $templates)
     {
-        $this->validateTemplates( $templates );
+        $this->validateTemplates($templates);
         $this->templates = $templates;
 
         return $this;
@@ -174,6 +171,7 @@ abstract class BaseService
                 throw new \Exception('Unknown template "' . $templates->$getter() . '".');
             }
         }
+
         return true;
     }
 
@@ -212,5 +210,36 @@ abstract class BaseService
     public function getTableAlias()
     {
         return self::TABLE_ALIAS;
+    }
+
+
+    /**
+     * @param $prefix
+     * @return Templates
+     */
+    public function configureTemplates($prefix)
+    {
+        $templates = new Templates($prefix);
+
+        return $templates
+            ->setIndex('index.html.twig')
+            ->setCreate('create.html.twig')
+            ->setEdit('edit.html.twig')
+            ->setDelete('delete.html.twig');
+    }
+
+    /**
+     * @param $prefix
+     * @return Routes
+     */
+    public function configureRoutes($prefix)
+    {
+        $routes = new Routes($prefix);
+
+        return $routes
+            ->setIndex('index')
+            ->setCreate('create')
+            ->setEdit('edit')
+            ->setDelete('delete');
     }
 }
