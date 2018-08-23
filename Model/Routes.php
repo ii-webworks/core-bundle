@@ -91,7 +91,7 @@ class Routes implements RoutesInterface
     public function getRouteKeys()
     {
         $data = [];
-        foreach ( $this as $keyName => $value) {
+        foreach ($this as $keyName => $value) {
             $data[] = $keyName;
         }
         return $data;

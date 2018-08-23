@@ -91,7 +91,7 @@ class Templates implements TemplatesInterface
     public function getRouteKeys()
     {
         $data = [];
-        foreach ( $this as $keyName => $value) {
+        foreach ($this as $keyName => $value) {
             $data[] = $keyName;
         }
         return $data;

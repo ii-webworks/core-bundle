@@ -11,7 +11,6 @@ namespace webworks\CoreBundle\Service;
 use Doctrine\ORM\Query;
 use FOS\UserBundle\Model\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\Form\Form;
 use webworks\CoreBundle\Model\RoutesInterface;
 use webworks\CoreBundle\Model\TemplatesInterface;
 
@@ -83,10 +82,11 @@ abstract class BaseService
         if (!$this->routes instanceof RoutesInterface) {
             $routes = $this->getRoutesConfig();
             if (!$routes instanceof RoutesInterface) {
-                throw new \Exception('The method getRoutesConfig() has to return a RoutesInterface Object');
+                throw new \Exception('The method getRoutesConfig() must return a RoutesInterface Object');
             }
             $this->setRoutes($routes);
         }
+
         return $this->routes;
     }
 
@@ -151,7 +151,7 @@ abstract class BaseService
      */
     public function setTemplates(TemplatesInterface $templates)
     {
-        $this->validateTemplates( $templates );
+        $this->validateTemplates($templates);
         $this->templates = $templates;
 
         return $this;
@@ -174,6 +174,7 @@ abstract class BaseService
                 throw new \Exception('Unknown template "' . $templates->$getter() . '".');
             }
         }
+
         return true;
     }
 
@@ -213,4 +214,5 @@ abstract class BaseService
     {
         return self::TABLE_ALIAS;
     }
+
 }

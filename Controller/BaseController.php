@@ -55,14 +55,14 @@ abstract class BaseController extends Controller
      *
      * @todo: why does this method exist? it is only used once and the name of the method is ambiguous
      */
-    private function getMainClassName() {
+    private function getMainClassName()
+    {
         return $this->getService()->getEntityClassName();
     }
 
     /**
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @throws ClassNotFoundException
      * @throws \Exception
      */
     public function indexAction(Request $request)
