@@ -224,7 +224,7 @@ abstract class BaseController extends Controller
             $this->getService()->getEM()->remove($obj);
             $this->getService()->getEM()->flush();
 
-            return $this->redirectToRoute($this->getService()->getRoutes()->getIndex());
+            return $this->redirectToRoute($this->getService()->getRoute('index'));
         }
 
         $params = [
