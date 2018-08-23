@@ -74,13 +74,14 @@ abstract class BaseService
     }
 
     /**
+     * @param string $prefix
      * @return RoutesInterface
      * @throws \Exception
      */
-    public function getRoutes()
+    public function getRoutes($prefix = '')
     {
         if (!$this->routes instanceof RoutesInterface) {
-            $routes = $this->getRoutesConfig();
+            $routes = $this->configureRoutes($prefix);
             if (!$routes instanceof RoutesInterface) {
                 throw new \Exception('The method getRoutesConfig() must return a RoutesInterface Object');
             }
@@ -124,13 +125,14 @@ abstract class BaseService
     }
 
     /**
+     * @param string $prefix
      * @return TemplatesInterface
      * @throws \Exception
      */
-    public function getTemplates()
+    public function getTemplates($prefix = '')
     {
         if (!$this->templates instanceof TemplatesInterface) {
-            $templates = $this->getTemplatesConfig();
+            $templates = $this->configureTemplates($prefix);
             if (!$templates instanceof TemplatesInterface) {
                 throw new \Exception('The method getTemplatesConfig() has to return a TemplatesInterface Object');
             }
