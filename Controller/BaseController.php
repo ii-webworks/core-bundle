@@ -79,7 +79,7 @@ abstract class BaseController extends Controller
             'items' => $pagination,
             'routes' => $this->getService()->getRoutes(),
         ];
-        return $this->render($this->getService()->getTemplates()->getIndex(), $params);
+        return $this->render($this->getService()->getTemplate('index'), $params);
     }
 
     /**
@@ -131,7 +131,7 @@ abstract class BaseController extends Controller
             $this->getService()->getEM()->flush();
 
             $this->addFlash('success', 'Der Datensatz wurde erfolgreich gespeichert.');
-            return $this->redirectToRoute($this->getService()->getRoutes()->getIndex());
+            return $this->redirectToRoute($this->getService()->getRoute('index'));
         }
 
         $params = [
@@ -140,9 +140,9 @@ abstract class BaseController extends Controller
             'routes' => $this->getService()->getRoutes(),
         ];
         if (!is_null($id) && $id > 0) {
-            return $this->render($this->getService()->getTemplates()->getEdit(), $params);
+            return $this->render($this->getService()->getTemplate('edit'), $params);
         } else {
-            return $this->render($this->getService()->getTemplates()->getCreate(), $params);
+            return $this->render($this->getService()->getTemplate('create'), $params);
         }
     }
 
@@ -232,7 +232,7 @@ abstract class BaseController extends Controller
             'obj' => $obj,
             'form' => $form->createView(),
         ];
-        return $this->render($this->getService()->getTemplates()->getDelete(), $params);
+        return $this->render($this->getService()->getTemplate('delete'), $params);
     }
 
     /**
