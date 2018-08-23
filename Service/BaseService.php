@@ -11,7 +11,9 @@ namespace webworks\CoreBundle\Service;
 use Doctrine\ORM\Query;
 use FOS\UserBundle\Model\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use webworks\CoreBundle\Model\Routes;
 use webworks\CoreBundle\Model\RoutesInterface;
+use webworks\CoreBundle\Model\Templates;
 use webworks\CoreBundle\Model\TemplatesInterface;
 
 /**
@@ -55,6 +57,9 @@ abstract class BaseService
         return $this->container;
     }
 
+    /**
+     * @return \Doctrine\ORM\EntityManager|object
+     */
     public function getEM()
     {
         return $this->getContainer()->get('doctrine.orm.default_entity_manager');
@@ -67,11 +72,6 @@ abstract class BaseService
     {
         return $this->getContainer()->get('security.token_storage')->getToken()->getUser();
     }
-
-    /**
-     * @return RoutesInterface
-     */
-    abstract public function getRoutesConfig();
 
     /**
      * @return RoutesInterface
@@ -122,11 +122,6 @@ abstract class BaseService
         }
         return true;
     }
-
-    /**
-     * @return TemplatesInterface
-     */
-    abstract public function getTemplatesConfig();
 
     /**
      * @return TemplatesInterface
@@ -215,4 +210,34 @@ abstract class BaseService
         return self::TABLE_ALIAS;
     }
 
+
+    /**
+     * @param $prefix
+     * @return Templates
+     */
+    public function configureTemplates($prefix)
+    {
+        $templates = new Templates($prefix);
+
+        return $templates
+            ->setIndex('index.html.twig')
+            ->setCreate('create.html.twig')
+            ->setEdit('edit.html.twig')
+            ->setDelete('delete.html.twig');
+    }
+
+    /**
+     * @param $prefix
+     * @return Routes
+     */
+    public function configureRoutes($prefix)
+    {
+        $routes = new Routes($prefix);
+
+        return $routes
+            ->setIndex('index')
+            ->setCreate('create')
+            ->setEdit('edit')
+            ->setDelete('delete');
+    }
 }
