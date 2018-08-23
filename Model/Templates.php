@@ -8,13 +8,24 @@ class Templates implements TemplatesInterface
     private $create;
     private $edit;
     private $delete;
+    private $prefix;
+
+    /**
+     * Routes constructor.
+     * @param string $prefix
+     */
+    public function __construct($prefix)
+    {
+        $this->prefix = $prefix;
+    }
+
 
     /**
      * @return mixed
      */
     public function getIndex()
     {
-        return $this->index;
+        return $this->prefix . $this->index;
     }
 
     /**
@@ -33,7 +44,7 @@ class Templates implements TemplatesInterface
      */
     public function getCreate()
     {
-        return $this->create;
+        return $this->prefix . $this->create;
     }
 
     /**
@@ -52,7 +63,7 @@ class Templates implements TemplatesInterface
      */
     public function getEdit()
     {
-        return $this->edit;
+        return $this->prefix . $this->edit;
     }
 
     /**
@@ -71,7 +82,7 @@ class Templates implements TemplatesInterface
      */
     public function getDelete()
     {
-        return $this->delete;
+        return $this->prefix . $this->delete;
     }
 
     /**
