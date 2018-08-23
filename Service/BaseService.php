@@ -11,10 +11,6 @@ namespace webworks\CoreBundle\Service;
 use Doctrine\ORM\Query;
 use FOS\UserBundle\Model\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use webworks\CoreBundle\Model\Routes;
-use webworks\CoreBundle\Model\RoutesInterface;
-use webworks\CoreBundle\Model\Templates;
-use webworks\CoreBundle\Model\TemplatesInterface;
 
 /**
  * Class BaseService
@@ -22,13 +18,22 @@ use webworks\CoreBundle\Model\TemplatesInterface;
  */
 abstract class BaseService
 {
-    const TABLE_ALIAS = 'a';
-
     private $container;
-    /** @var RoutesInterface $routes */
-    private $routes;
-    /** @var TemplatesInterface $templates */
-    private $templates;
+    private $routePrefix = '';
+    private $templatePrefix = '';
+    private $tableAlias = 'a';
+    private $routes = [
+        'index' => 'index',
+        'edit' => 'edit',
+        'create' => 'create',
+        'delete' => 'delete',
+    ];
+    private $templates = [
+        'index' => 'index.html.twig',
+        'edit' => 'edit.html.twig',
+        'create' => 'create.html.twig',
+        'delete' => 'delete.html.twig',
+    ];
 
     /**
      * BaseService constructor.
@@ -73,107 +78,6 @@ abstract class BaseService
         return $this->getContainer()->get('security.token_storage')->getToken()->getUser();
     }
 
-    /**
-     * @param string $prefix
-     * @return RoutesInterface
-     * @throws \Exception
-     */
-    public function getRoutes($prefix = '')
-    {
-        if (!$this->routes instanceof RoutesInterface) {
-            $routes = $this->configureRoutes($prefix);
-            if (!$routes instanceof RoutesInterface) {
-                throw new \Exception('The method getRoutesConfig() must return a RoutesInterface Object');
-            }
-            $this->setRoutes($routes);
-        }
-
-        return $this->routes;
-    }
-
-    /**
-     * @param RoutesInterface $routes
-     * @return $this
-     * @throws \Exception
-     */
-    public function setRoutes(RoutesInterface $routes)
-    {
-        $this->validateRoutes($routes);
-        $this->routes = $routes;
-
-        return $this;
-    }
-
-    /**
-     * @param RoutesInterface $routes
-     * @return bool
-     * @throws \Exception
-     */
-    public function validateRoutes(RoutesInterface $routes)
-    {
-        $router = $this->getContainer()->get('router');
-        foreach ($routes->getRouteKeys() as $keyname) {
-            $getter = 'get' . $keyname;
-            if (!method_exists($routes, $getter)) {
-                throw new \Exception('Method "' . $getter . '" for property "' . $keyname . '" in class "' . get_class($routes) . '" not found. Please define a getter and setter for your properties.');
-            }
-            if (is_null($router->getRouteCollection()->get($routes->$getter()))) {
-                throw new \Exception('Unknown route "' . $routes->$getter() . '".');
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @param string $prefix
-     * @return TemplatesInterface
-     * @throws \Exception
-     */
-    public function getTemplates($prefix = '')
-    {
-        if (!$this->templates instanceof TemplatesInterface) {
-            $templates = $this->configureTemplates($prefix);
-            if (!$templates instanceof TemplatesInterface) {
-                throw new \Exception('The method getTemplatesConfig() has to return a TemplatesInterface Object');
-            }
-            $this->setTemplates($templates);
-        }
-        return $this->templates;
-    }
-
-    /**
-     * @param TemplatesInterface $templates
-     * @return $this
-     * @throws \Exception
-     */
-    public function setTemplates(TemplatesInterface $templates)
-    {
-        $this->validateTemplates($templates);
-        $this->templates = $templates;
-
-        return $this;
-    }
-
-    /**
-     * @param TemplatesInterface $templates
-     * @return bool
-     * @throws \Exception
-     */
-    public function validateTemplates(TemplatesInterface $templates)
-    {
-        $templateEngine = $this->getContainer()->get('templating');
-        foreach ($templates->getRouteKeys() as $keyname) {
-            $getter = 'get' . $keyname;
-            if (!method_exists($templates, $getter)) {
-                throw new \Exception('Method "' . $getter . '" for property "' . $keyname . '" in class "' . get_class($templates) . '" not found. Please define a getter and setter for your properties.');
-            }
-            if (!$templateEngine->exists($templates->$getter())) {
-                throw new \Exception('Unknown template "' . $templates->$getter() . '".');
-            }
-        }
-
-        return true;
-    }
 
     /**
      * @param $obj
@@ -207,39 +111,152 @@ abstract class BaseService
             ->getQuery();
     }
 
+    /**
+     * @return string
+     */
     public function getTableAlias()
     {
-        return self::TABLE_ALIAS;
+        return $this->tableAlias;
     }
 
-
     /**
-     * @param $prefix
-     * @return Templates
+     * @param $alias
      */
-    public function configureTemplates($prefix)
+    protected function setTableAlias($alias)
     {
-        $templates = new Templates($prefix);
-
-        return $templates
-            ->setIndex('index.html.twig')
-            ->setCreate('create.html.twig')
-            ->setEdit('edit.html.twig')
-            ->setDelete('delete.html.twig');
+        $this->tableAlias = $alias;
     }
 
     /**
      * @param $prefix
-     * @return Routes
      */
-    public function configureRoutes($prefix)
+    protected function setTemplatePrefix($prefix)
     {
-        $routes = new Routes($prefix);
+        $this->templatePrefix = $prefix;
+    }
 
-        return $routes
-            ->setIndex('index')
-            ->setCreate('create')
-            ->setEdit('edit')
-            ->setDelete('delete');
+    /**
+     * @param $prefix
+     */
+    protected function setRoutePrefix($prefix)
+    {
+        $this->routePrefix = $prefix;
+    }
+
+    /**
+     * @param array $templates
+     */
+    protected function setTemplates(array $templates)
+    {
+        $this->templates = $templates;
+    }
+
+    /**
+     * @param array $routes
+     */
+    protected function setRoutes(array $routes)
+    {
+        $this->routes = $routes;
+    }
+
+    /**
+     * @param $path
+     * @return bool
+     */
+    private function templateExists($path)
+    {
+        $templating = $this->getContainer()->get('templating');
+
+        return $templating->exists($path);
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function getTemplates()
+    {
+        $templates = [];
+
+        if (sizeof($this->templates) > 0) {
+            foreach ($this->templates as $key => $template) {
+                if ($this->templateExists($template)) {
+                    $templates[$key] = $template;
+                } else {
+                    $prefixedTemplate = $this->templatePrefix . $template;
+                    if ($this->templateExists($prefixedTemplate)) {
+                        $templates[$key] = $prefixedTemplate;
+                    } else {
+                        throw new \Exception('Template "' . $template . '" not found with prefix "' . $this->templatePrefix . '".');
+                    }
+                }
+            }
+        }
+
+        return $templates;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getTemplate($key)
+    {
+        $templates = $this->getTemplates();
+
+        if (isset($templates[$key])) {
+            return $templates[$key];
+        }
+
+        throw new \Exception('Template for key"' . $key . '" not found.');
+    }
+
+    private function routeExists($name)
+    {
+        $router = $this->container->get('router');
+        return (null === $router->getRouteCollection()->get($name)) ? false : true;
+    }
+
+    /**
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getRoutes()
+    {
+        $routes = [];
+
+        if (sizeof($this->routes) > 0) {
+            foreach ($this->routes as $key => $route) {
+                if ($this->routeExists($route)) {
+                    $routes[$key] = $route;
+                } else {
+                    $prefixedRoute = $this->routePrefix . $route;
+                    if ($this->routeExists($prefixedRoute)) {
+                        $routes[$key] = $prefixedRoute;
+                    } else {
+                        throw new \Exception('Route "' . $route . '" not found with prefix "' . $this->routePrefix . '".');
+                    }
+                }
+            }
+        }
+
+        return $route;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getRoute($key)
+    {
+        $routes = $this->getRoutes();
+
+        if (isset($routes[$key])) {
+            return $routes[$key];
+        }
+
+        throw new \Exception('Route for key"' . $key . '" not found.');
     }
 }
