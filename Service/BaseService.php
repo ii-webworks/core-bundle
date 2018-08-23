@@ -241,7 +241,7 @@ abstract class BaseService
             }
         }
 
-        return $route;
+        return $routes;
     }
 
     /**
