@@ -79,14 +79,20 @@ abstract class BaseController extends Controller
             'items' => $pagination,
             'routes' => $this->getService()->getRoutes(),
         ];
+        $params = $this->prepareParams($params);
         return $this->render($this->getService()->getTemplate('index'), $params);
+    }
+
+    protected function prepareParams(array $params)
+    {
+        return $params;
     }
 
     /**
      * @param Request $request
      * @return \Doctrine\ORM\Query
      */
-    public function prepareIndexQuery(Request $request)
+    protected function prepareIndexQuery(Request $request)
     {
         return $this->getService()->getAll();
     }
@@ -148,6 +154,7 @@ abstract class BaseController extends Controller
             'obj' => $obj,
             'routes' => $this->getService()->getRoutes(),
         ];
+        $params = $this->prepareParams($params);
         if (!is_null($id) && $id > 0) {
             return $this->render($this->getService()->getTemplate('edit'), $params);
         } else {
@@ -241,6 +248,7 @@ abstract class BaseController extends Controller
             'obj' => $obj,
             'form' => $form->createView(),
         ];
+        $params = $this->prepareParams($params);
         return $this->render($this->getService()->getTemplate('delete'), $params);
     }
 
