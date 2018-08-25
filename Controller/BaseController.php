@@ -69,7 +69,7 @@ abstract class BaseController extends Controller
     {
         $paginator = $this->get('knp_paginator');
         $pagination = $paginator->paginate(
-            $this->getService()->getAll(),
+            $this->prepareIndexQuery($request),
             $request->query->getInt('page', 1),
             $this->getParameter('webworks_core.pagination_items')
         );
@@ -80,6 +80,15 @@ abstract class BaseController extends Controller
             'routes' => $this->getService()->getRoutes(),
         ];
         return $this->render($this->getService()->getTemplate('index'), $params);
+    }
+
+    /**
+     * @param Request $request
+     * @return \Doctrine\ORM\Query
+     */
+    public function prepareIndexQuery(Request $request)
+    {
+        return $this->getService()->getAll();
     }
 
     /**
