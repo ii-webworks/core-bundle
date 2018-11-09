@@ -22,7 +22,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->integerNode('pagination_items')->defaultValue(20)->end()
+            ->integerNode('pagination_items')->defaultValue(20)->end()
             ->end();
 
         return $treeBuilder;

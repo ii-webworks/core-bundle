@@ -55,21 +55,21 @@ abstract class BaseController extends Controller
      *
      * @todo: why does this method exist? it is only used once and the name of the method is ambiguous
      */
-    private function getMainClassName() {
+    private function getMainClassName()
+    {
         return $this->getService()->getEntityClassName();
     }
 
     /**
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @throws ClassNotFoundException
      * @throws \Exception
      */
     public function indexAction(Request $request)
     {
         $paginator = $this->get('knp_paginator');
         $pagination = $paginator->paginate(
-            $this->getService()->getAll(),
+            $this->prepareIndexQuery($request),
             $request->query->getInt('page', 1),
             $this->getParameter('webworks_core.pagination_items')
         );
@@ -79,7 +79,22 @@ abstract class BaseController extends Controller
             'items' => $pagination,
             'routes' => $this->getService()->getRoutes(),
         ];
-        return $this->render($this->getService()->getTemplates()->getIndex(), $params);
+        $params = $this->prepareParams($params);
+        return $this->render($this->getService()->getTemplate('index'), $params);
+    }
+
+    protected function prepareParams(array $params)
+    {
+        return $params;
+    }
+
+    /**
+     * @param Request $request
+     * @return \Doctrine\ORM\Query
+     */
+    protected function prepareIndexQuery(Request $request)
+    {
+        return $this->getService()->getAll();
     }
 
     /**
@@ -131,7 +146,7 @@ abstract class BaseController extends Controller
             $this->getService()->getEM()->flush();
 
             $this->addFlash('success', 'Der Datensatz wurde erfolgreich gespeichert.');
-            return $this->redirectToRoute($this->getService()->getRoutes()->getIndex());
+            return $this->redirectToRoute($this->getService()->getRoute('index'));
         }
 
         $params = [
@@ -139,10 +154,11 @@ abstract class BaseController extends Controller
             'obj' => $obj,
             'routes' => $this->getService()->getRoutes(),
         ];
+        $params = $this->prepareParams($params);
         if (!is_null($id) && $id > 0) {
-            return $this->render($this->getService()->getTemplates()->getEdit(), $params);
+            return $this->render($this->getService()->getTemplate('edit'), $params);
         } else {
-            return $this->render($this->getService()->getTemplates()->getCreate(), $params);
+            return $this->render($this->getService()->getTemplate('create'), $params);
         }
     }
 
@@ -224,7 +240,7 @@ abstract class BaseController extends Controller
             $this->getService()->getEM()->remove($obj);
             $this->getService()->getEM()->flush();
 
-            return $this->redirectToRoute($this->getService()->getRoutes()->getIndex());
+            return $this->redirectToRoute($this->getService()->getRoute('index'));
         }
 
         $params = [
@@ -232,7 +248,8 @@ abstract class BaseController extends Controller
             'obj' => $obj,
             'form' => $form->createView(),
         ];
-        return $this->render($this->getService()->getTemplates()->getDelete(), $params);
+        $params = $this->prepareParams($params);
+        return $this->render($this->getService()->getTemplate('delete'), $params);
     }
 
     /**

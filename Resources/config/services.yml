@@ -1,7 +1,7 @@
 services:
-    webworks.core.twig_extension:
-        class: webworks\CoreBundle\Twig\TwigExtension
-        public: false
-        arguments: ['@service_container']
-        tags:
-            - { name: twig.runtime }
+  webworks.core.twig_extension:
+    class: webworks\CoreBundle\Twig\TwigExtension
+    public: false
+    arguments: ['@service_container']
+    tags:
+    - { name: twig.runtime }

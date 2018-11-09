@@ -1,27 +1,29 @@
 {
-    "name": "webworksnbg/core-bundle",
-    "description": "webworks Core Bundle",
-    "keywords": ["core"],
-    "type": "symfony-bundle",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Anton Dachauer",
-            "email": "ad@wwnbg.de"
-        }
-    ],
-    "require": {
-        "php": ">=7.0",
-        "friendsofsymfony/user-bundle": "~2.0",
-        "knplabs/knp-paginator-bundle": "^2.7"
-    },
-    "require-dev" : {
-        "doctrine/cache" : "~1.0",
-        "symfony/cache" : "~3.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "webworks\\CoreBundle\\": ""
-        }
+  "name": "webworksnbg/core-bundle",
+  "description": "webworks Core Bundle",
+  "keywords": [
+    "core"
+  ],
+  "type": "symfony-bundle",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Anton Dachauer",
+      "email": "ad@wwnbg.de"
     }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "friendsofsymfony/user-bundle": "~2.0",
+    "knplabs/knp-paginator-bundle": "^2.7"
+  },
+  "require-dev": {
+    "doctrine/cache": "~1.0",
+    "symfony/cache": "~3.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "webworks\\CoreBundle\\": ""
+    }
+  }
 }
